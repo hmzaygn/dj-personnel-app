@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import User
 from dj_rest_auth.serializers import TokenSerializer
+from .models import Profile
 
 
 
@@ -68,3 +69,32 @@ class CustomTokenSerializer(TokenSerializer):
 
     class Meta(TokenSerializer.Meta):
         fields = ("key", "user")
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    user = serializers.StringRelatedField()
+    user_id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = (
+            "id",
+            "user",
+            "user_id",
+            "display_name",
+            "avatar",
+            "bio",
+        )
+    
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.user_id = self.context["request"].user.id
+        instance.save()
+        return instance
+
+
+
+
+
+
+
